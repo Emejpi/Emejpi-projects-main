@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blue moon", "Blue moon.csproj", "{1C938890-CB54-1039-AB5A-439DFF795F54}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blue moon.Editor", "Blue moon.Editor.csproj", "{CEA74A34-34BC-7EF6-F2FD-15B547C6A39C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C938890-CB54-1039-AB5A-439DFF795F54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C938890-CB54-1039-AB5A-439DFF795F54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C938890-CB54-1039-AB5A-439DFF795F54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C938890-CB54-1039-AB5A-439DFF795F54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEA74A34-34BC-7EF6-F2FD-15B547C6A39C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEA74A34-34BC-7EF6-F2FD-15B547C6A39C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEA74A34-34BC-7EF6-F2FD-15B547C6A39C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEA74A34-34BC-7EF6-F2FD-15B547C6A39C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
