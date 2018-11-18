@@ -32,8 +32,12 @@ public class PathFinder : MonoBehaviour {
     {
         foreach(Transform child in Board.main.transform)
         {
-            child.GetComponent<ExtraSquareInfo>().visited = false;
-            child.GetComponent<ExtraSquareInfo>().danger = false;
+            ExtraSquareInfo squareInfo = child.GetComponent<ExtraSquareInfo>();
+            if (!squareInfo)
+                return;
+
+            squareInfo.visited = false;
+            squareInfo.danger = false;
         }
     }
 
@@ -71,7 +75,7 @@ public class PathFinder : MonoBehaviour {
 
                 if (!BreakPoint(currentSquare))
                 {
-                    print("break");
+                    //print("break");
                     ClearBoard();
                     return Return(currentSquare);
                 }
@@ -95,7 +99,7 @@ public class PathFinder : MonoBehaviour {
 
         ClearBoard();
 
-        print("no break");
+        //print("no break");
         return new SquareGraphElem(square);
     }
 

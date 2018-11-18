@@ -14,6 +14,7 @@ public class Booming : MonoBehaviour {
         bomb.GetComponent<Bomb>().range = range;
         square.bomb = bomb.gameObject;
         Board.main.ShadowExplode(square, range);
+        bomb.GetComponent<Bomb>().myCreator = GetComponent<Creature>();
 
         return bomb.gameObject;
     }

@@ -26,7 +26,7 @@ public class SimplaAIHunter : Movement { //BEZ ROZUMIENIA CZASU TO NIE POCIAGNIE
             bombing = GetComponent<Booming>();
         }
 
-        if(!player)
+        if(!player || !player.enabled)
         {
             Movement[] players = GameObject.FindObjectsOfType<Movement>();
 
@@ -122,7 +122,7 @@ public class SimplaAIHunter : Movement { //BEZ ROZUMIENIA CZASU TO NIE POCIAGNIE
             }
                 PathFinderV2.main.MarkDanger();
 
-                if (targetSquare.info.danger || (currentBomb != null))
+                if (targetSquare.info.danger /*|| (currentBomb != null)*/)
                     return;
 
                 if ((!targetSquare.Walkable(false, false) && (targetSquare.type == Square.Type.destructable || targetSquare.player)) && (currentSquare.bomb == null))

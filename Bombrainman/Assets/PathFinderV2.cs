@@ -31,6 +31,12 @@ public class PathFinderV2 : PathFinder {
         for (int i = loopCount - 1; i >= 0; i--)
         {
             SquareGraphElem currentSquare = currentStep[i];
+            if(currentSquare.mySquare == null)
+            {
+                print("no square!");
+                continue;
+            }
+
             ExtraSquareInfo squareInfo = currentSquare.mySquare.info;
             if (squareInfo.visited)
             {
@@ -253,5 +259,69 @@ public class PathFinderV2 : PathFinder {
         EndLookAround();
 
         return squareOut;
+    }
+
+    public bool FindSquareWithTags(Square square, int loopCount, List<TagWithValue> tagsWV, out Square squareOut)
+    {
+        SetTagsWV();
+
+        print("Find squer with tags");
+
+        if (square == null)
+        {
+            print("There is no swuare");
+            squareOut = square;
+            return true;
+        }
+
+        StartLookAround(square);
+        squareOut = square;
+
+        bool solutionFound = false;
+        for (int i = 0; i < loopCount; i++)
+        {
+            solutionFound = false;
+            foreach (SquareGraphElem elem in currentStep)
+            {
+                bool good = true;
+                foreach (TagWithValue tagWV in tagsWV)
+                {
+                    if(elem == null
+                        || !elem.mySquare 
+                        || !elem.mySquare.info 
+                        || elem.mySquare.info.tagsWV == null 
+                        || !elem.mySquare.info.tagsWV.Contains(tagWV))
+                    {
+                        good = false;
+                        break;
+                    }
+                }
+                if(good)
+                {
+                    squareOut = elem.mySquare;
+                    print("square found with " + tagsWV[0].tag.ToString() + " " + tagsWV[0].value);
+                    solutionFound = true;
+                    break;
+                }
+            }
+            if (solutionFound)
+                break;
+
+            LookAroundStep();
+        }
+
+        EndLookAround();
+
+        return squareOut;
+    }
+
+    public void SetTagsWV()
+    {
+        MarkDanger();
+        foreach (Square square in Board.main.GetComponentsInChildren<Square>())
+        {
+            square.info.tagsWV = new List<TagWithValue>();
+            square.info.tagsWV.Add(new TagWithValue { tag = Tag.safe, value = !square.info.danger});
+        }
     }
 }

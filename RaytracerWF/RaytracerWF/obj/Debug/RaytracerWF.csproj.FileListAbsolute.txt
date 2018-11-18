@@ -1,0 +1,10 @@
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\bin\Debug\RaytracerWF.exe.config
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\bin\Debug\RaytracerWF.exe
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\bin\Debug\RaytracerWF.pdb
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.csprojAssemblyReference.cache
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.Properties.Resources.resources
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.csproj.GenerateResource.cache
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.csproj.CoreCompileInputs.cache
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.exe
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.pdb
+C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.Form1.resources

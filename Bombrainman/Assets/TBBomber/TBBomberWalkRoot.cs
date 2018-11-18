@@ -22,6 +22,7 @@ public class TBBomberWalkRoot : TBRoot {
 
     public Square GetMySquare()
     {
+
         return GetComponent<GoToMovement>().currentSquare;
     }
 }

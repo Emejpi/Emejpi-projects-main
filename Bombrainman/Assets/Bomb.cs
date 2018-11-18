@@ -12,6 +12,8 @@ public class Bomb : Movement {
 
     public int range;
 
+    public Creature myCreator;
+
 	// Use this for initialization
 	void Start () {
         timeTillBoomSlice = timeTillBoom / 5;
@@ -40,9 +42,16 @@ public class Bomb : Movement {
             Invoke("CountDown", timeTillBoomSlice);
     }
 
+    public void FeedkillCount(int killCount)
+    {
+        myCreator.FeedPoints(killCount);
+    }
+
     void Explode()
     {
-        Board.main.Explode(currentSquare, range);
+        int killCount;
+        Board.main.Explode(currentSquare, range, out killCount);
+        FeedkillCount(killCount);
         Destroy(gameObject);
     }
 	

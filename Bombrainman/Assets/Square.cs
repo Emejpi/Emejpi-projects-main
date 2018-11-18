@@ -82,7 +82,15 @@ public class Square : MonoBehaviour {
 
     public void ChangeType(Type type)
     {
+        bool kill;
+        ChangeType(type, out kill);
+    }
+
+    public void ChangeType(Type type, out bool kill)
+    {
         this.type = type;
+
+        kill = false;
 
         switch(type)
         {
@@ -105,11 +113,21 @@ public class Square : MonoBehaviour {
                 GetComponent<Image>().color = Board.main.explosionColor;
 
                 if (player != null)
-                    Board.main.DestroyPlayer(player.gameObject);
-
-                if(bomb)
                 {
-                    Board.main.Explode(this, bomb.GetComponent<Bomb>().range);
+                    kill = true;
+                    Board.main.DestroyPlayer(player.gameObject);
+                }
+
+                if(bomb != null)
+                {
+                    if (!bomb.GetComponent<Bomb>())
+                        return;
+
+                    int killcount;
+                    GameObject bombObj = bomb;
+                    Board.main.Explode(this, bomb.GetComponent<Bomb>().range, out killcount);
+                    bombObj.GetComponent<Bomb>().FeedkillCount(killcount);
+                    Destroy(bombObj);
                 }
                 break;
         }

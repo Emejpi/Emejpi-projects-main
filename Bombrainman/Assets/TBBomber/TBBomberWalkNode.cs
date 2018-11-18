@@ -6,6 +6,7 @@ public class TBBomberWalkNode : TBNode {
 
     protected TBBomberWalkRoot GetRoot()
     {
+        print(root.gameObject.name);
         return root.GetComponent<TBBomberWalkRoot>();
     }
 
