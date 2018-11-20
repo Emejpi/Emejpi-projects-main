@@ -15,7 +15,7 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
     public partial class Form1 : Form
     {
         public Camera camera;
-        public Lighting lighting;
+        public Light light;
 
         List<Primitive> primitives;
 
@@ -23,7 +23,7 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
 
         public void AddPrimitive(Primitive primitive)
         {
-            primitive.SetAmbient(lighting.ambient);
+            //primitive.SetAmbient(lighting.ambient);
             primitives.Add(primitive);
         }
 
@@ -60,12 +60,12 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
             //}
 
                     camera = new Camera();
-            lighting = new Lighting();
+            //light = new Light();
 
             primitives = new List<Primitive>();
 
             FileReader reader = new FileReader();
-            reader.Read(@"C:\Users\Emejpi\Downloads\RayTracer-master\RayTracer-master\example_inputs\scene4-ambient.test");
+            reader.Read(@"C:\Users\komp\Downloads\test\test\scene4-ambient.test");
 
             foreach (Primitive primitive in primitives)
                 reader.DrawMatrix(primitive.transform);
@@ -96,8 +96,9 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
                         Ray transformedRay = primitive.transform.Reverse() * ray;
                         //Debug.WriteLine("after");
                         //reader.DrawMatrix(primitive.transform.Reverse());
+                        Vector3 norm;
 
-                        if (primitive.Intersect(transformedRay, out pointOfContact))
+                        if (primitive.Intersect(transformedRay, out pointOfContact, out norm))
                         {
                             pointOfContact = primitive.transform * pointOfContact;
 
@@ -105,7 +106,10 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
                             if (curDistance < closestPointOfContact)
                             {
                                 closestPointOfContact = curDistance;
-                                pixelColor = primitive.ambient;
+
+                                //==LIGHT==//
+
+                                pixelColor = light.GetColorAtPoint(pointOfContact, primitive.material, norm);
                             }
                         }
                     }

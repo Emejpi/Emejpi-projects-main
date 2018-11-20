@@ -8,3 +8,12 @@ C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.cspro
 C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.exe
 C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.pdb
 C:\Users\Emejpi\source\repos\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.Form1.resources
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\bin\Debug\RaytracerWF.exe.config
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.exe
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.pdb
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.csprojResolveAssemblyReference.cache
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.Form1.resources
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.Properties.Resources.resources
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.csproj.GenerateResource.Cache
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\bin\Debug\RaytracerWF.exe
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\bin\Debug\RaytracerWF.pdb

@@ -127,8 +127,9 @@ namespace RaytracerWF
             vm.grid[2, 0] = v.z;
             vm.grid[3, 0] = 1;
 
+            float w = vm.grid[3, 0];
             Matrix matNew = m * vm;
-            Vector3 vecNew = new Vector3(matNew.grid[0, 0], matNew.grid[1, 0], matNew.grid[2, 0]);
+            Vector3 vecNew = new Vector3(matNew.grid[0, 0]/w, matNew.grid[1, 0]/w, matNew.grid[2, 0]/w);
 
             return vecNew;
         }

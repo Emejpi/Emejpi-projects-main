@@ -111,14 +111,9 @@ namespace RaytracerWF
 
     public class Primitive
     {
-        public Color ambient;
+        public Material material;
         public Matrix transform;
         public Matrix reverseTransform;
-
-        public void SetAmbient(Color color)
-        {
-            ambient = color;
-        }
 
         public virtual bool Intersect(Ray ray, out Vector3 pointOfContact, out Vector3 normal)
         {

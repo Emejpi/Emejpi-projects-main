@@ -23,7 +23,14 @@ public enum Command
     pushTransform,
     scale,
     translate,
-    rotate
+    rotate,
+    directional,
+    point,
+    attenuation,
+    diffuse,
+    specular,
+    shininess,
+    emission
 }
 
 namespace RaytracerWF
@@ -38,11 +45,14 @@ namespace RaytracerWF
         Transform transform;
         List<Transform> transformStack;
 
+        Material material;
+
         public FileReader()
         {
             transform = new Transform();
             transform.Set();
-            transformStack = new List<Transform>();            
+            transformStack = new List<Transform>();
+            material = new Material();          
         }
 
         void Push()
@@ -152,6 +162,30 @@ namespace RaytracerWF
 
                     case "rotate":
                         curCommand = Command.rotate;
+                        break;
+
+                    case "directional":
+                        curCommand = Command.directional;
+                        break;
+
+                    case "point":
+                        curCommand = Command.point;
+                        break;
+
+                    case "attenuation":
+                        curCommand = Command.attenuation;
+                        break;
+
+                    case "diffuse":
+                        curCommand = Command.diffuse;
+                        break;
+
+                    case "specular":
+                        curCommand = Command.specular;
+                        break;
+
+                    case "emission":
+                        curCommand = Command.emission;
                         break;
 
                     default:
@@ -274,6 +308,7 @@ namespace RaytracerWF
                     triangle.transform = transform.GetMatrix();
                     triangle.reverseTransform = triangle.transform.Reverse();
                     triangle.normal = triangle.Normal();
+                    triangle.material = new Material(material);
                     Form1.main.AddPrimitive(triangle);
                     break;
 
@@ -284,6 +319,7 @@ namespace RaytracerWF
                     Sphere sphere = new Sphere(new Vector3(args[0], args[1], args[2]), args[3]);
                     sphere.transform = transform.GetMatrix();
                     sphere.reverseTransform = sphere.transform.Reverse();
+                    sphere.material = new Material(material);
                     Form1.main.AddPrimitive(sphere);
                     break;
 
@@ -302,14 +338,14 @@ namespace RaytracerWF
                     if (args.Count < 2)
                         return false;
 
-                    Form1.main.camera.SetSize((int)args[0], (int)args[1]);
+                    Form1.main.camera.SetSize((int)args[0]/2, (int)args[1]/2);
                     break;
 
                 case Command.ambient:
                     if (args.Count < 3)
                         return false;
 
-                    Form1.main.lighting.ambient = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    material.ambient = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
                     break;
 
                 case Command.pushTransform:
@@ -353,6 +389,60 @@ namespace RaytracerWF
                         transform.rotation = Matrix.GetRotationZMatrix(args[2] * args[3]) * transform.rotation;
 
                     //DrawMatrix(transform);
+                    break;
+
+                case Command.directional:
+                    if (args.Count < 6)
+                        return false;
+
+                    DirectionalLight light = new DirectionalLight();
+                    light.color = Color.FromArgb((int)args[3], (int)args[4], (int)args[5]);
+                    light.direction = new Vector3(args[0], args[1], args[2]);
+                    Form1.main.light = light;
+                    break;
+
+                case Command.point:
+                    if (args.Count < 6)
+                        return false;
+
+                    PointLight lightP = new PointLight();
+                    lightP.color = Color.FromArgb((int)args[3], (int)args[4], (int)args[5]);
+                    lightP.position = new Vector3(args[0], args[1], args[2]);
+                    Form1.main.light = lightP;
+                    break;
+
+                case Command.attenuation:
+                    if (args.Count < 3)
+                        return false;
+
+                    break;
+
+                case Command.diffuse:
+                    if (args.Count < 3)
+                        return false;
+
+                    material.diffuse = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    break;
+
+                case Command.specular:
+                    if (args.Count < 3)
+                        return false;
+
+                    material.specular = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    break;
+
+                case Command.shininess:
+                    if (args.Count < 1)
+                        return false;
+
+                    material.shininess = args[0];
+                    break;
+
+                case Command.emission:
+                    if (args.Count < 3)
+                        return false;
+
+                    material.emission = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
                     break;
             }
 
