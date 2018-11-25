@@ -43,6 +43,11 @@ namespace RaytracerWF
             return new Vector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         }
 
+        public static Vector3 operator *(Vector3 v1, Vector3 v2)
+        {
+            return new Vector3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+        }
+
         public static Vector3 operator *(Vector3 vec, float v)
         {
             return new Vector3(vec.x * v, vec.y * v, vec.z * v);
@@ -80,6 +85,26 @@ namespace RaytracerWF
         {
             return (vec1 - vec2).Magnitude();
         }
+
+        public MyColor ToMyColor()
+        {
+            return new MyColor(
+                Math.Min((int)(x * 255), 255),
+                Math.Min((int)(y * 255), 255),
+                Math.Min((int)(z * 255), 255));
+        }
+
+        public Matrix ToMatrix(int w)
+        {
+            Matrix mat = new Matrix(4, 1);
+            mat.grid[0, 0] = x;
+            mat.grid[1, 0] = y;
+            mat.grid[2, 0] = z;
+            mat.grid[3, 0] = w;
+
+            return mat;
+        }
+
     }
 
     public class Matrix3x3

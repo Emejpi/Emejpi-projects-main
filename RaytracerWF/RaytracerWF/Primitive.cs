@@ -21,13 +21,15 @@ namespace RaytracerWF
 
         public override bool Intersect(Ray ray, out Vector3 pointOfContact, out Vector3 normal)
         {
+            Ray transformedRay = reverseTransform * ray;
+
             //x = 0;
-            Vector3 distance = ray.origin - center;
-            float a = Vector3.Dot(ray.direction, ray.direction);
-            float b = Vector3.Dot(distance, ray.direction) * 2;
-            float c = Vector3.Dot(distance, distance) - radius * radius;
+            Vector3 distance = transformedRay.origin - center;
+            float a = Vector3.Dot(transformedRay.direction, transformedRay.direction);
+            float b = Vector3.Dot(transformedRay.direction * 2, distance);
+            float c = Vector3.Dot(distance, distance) - (radius * radius);
             float delta = b * b - 4 * a * c;
-            if (delta < 0)
+            if (delta <= 0)
             {
                 pointOfContact = new Vector3();
                 normal = new Vector3();
@@ -39,9 +41,20 @@ namespace RaytracerWF
                 float x1 = (-b - deltaSqrt) / (2 * a);
                 float x2 = (-b + deltaSqrt) / (2 * a);
 
-                float x = x1 > x2 ? x2 : x1;
-                pointOfContact = ray.origin + ray.direction * x;
+                float x = x1;
+                if(x1 > 0 && x2 > 0)
+                    x = x1 > x2 ? x2 : x1;
+
+                if ((x1 < 0 && x2 > 0) || (x1 > 0 && x2 < 0))
+                    x = x1 < x2 ? x2 : x1;
+
+
+                pointOfContact = transformedRay.origin + transformedRay.direction * x;
                 normal = (pointOfContact - center).Normalize();
+
+                pointOfContact = transform * pointOfContact;
+                normal = transform.Inverse().Transpose() * normal;
+                normal = normal.Normalize();
                 //pointOfContact = transform.Reverse() * pointOfContact;
                 //if (Vector3.Dot(pointOfContact - center, pointOfContact - center) - radius * radius != 0)
                 //    return false;
@@ -67,7 +80,9 @@ namespace RaytracerWF
 
         public override bool Intersect(Ray ray, out Vector3 pointOfContact, out Vector3 normal)
         {
-            pointOfContact = GetPointOfContact(ray);
+            Ray transformedRay = reverseTransform * ray;
+
+            pointOfContact = GetPointOfContact(transformedRay);
             normal = this.normal;
             //pointOfContact = transform.Reverse() * pointOfContact;
 
@@ -83,6 +98,9 @@ namespace RaytracerWF
             if (bery3 > 1 || bery3 < 0)
                 return false;
 
+            pointOfContact = transform * pointOfContact;
+            normal = transform.Inverse().Transpose() * normal;
+            normal = normal.Normalize();
             return true;
         }
 
@@ -97,7 +115,7 @@ namespace RaytracerWF
 
         public Vector3 Normal()
         {
-            return Vector3.Cross(vert1 - vert2, vert3 - vert1);
+            return (Vector3.Cross(vert2 - vert1, vert3 - vert1)).Normalize();
         }
 
         public Vector3 GetPointOfContact(Ray ray)

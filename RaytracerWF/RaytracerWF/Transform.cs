@@ -119,6 +119,11 @@ namespace RaytracerWF
             return matrix;
         }
 
+        public Vector3 ToVector()
+        {
+            return new Vector3(grid[0, 0], grid[1, 0], grid[2, 0]);
+        }
+
         public static Vector3 operator *(Matrix m, Vector3 v)
         {
             Matrix vm = new Matrix(4, 1);
@@ -127,9 +132,10 @@ namespace RaytracerWF
             vm.grid[2, 0] = v.z;
             vm.grid[3, 0] = 1;
 
-            float w = vm.grid[3, 0];
             Matrix matNew = m * vm;
-            Vector3 vecNew = new Vector3(matNew.grid[0, 0]/w, matNew.grid[1, 0]/w, matNew.grid[2, 0]/w);
+            float w = matNew.grid[3, 0];
+
+            Vector3 vecNew = new Vector3(matNew.grid[0, 0], matNew.grid[1, 0], matNew.grid[2, 0]);
 
             return vecNew;
         }
@@ -163,7 +169,7 @@ namespace RaytracerWF
                 m3.grid[3, y] = 0;
             }
 
-            Vector3 dir = m3 * r.direction;
+            Vector3 dir = (m3 * r.direction).Normalize();
 
             return new Ray(pose, dir);
         }
@@ -354,6 +360,154 @@ namespace RaytracerWF
 
             return matrix;
         }
+
+        public Matrix Inverse()
+        {
+            float[] m = new float[16];
+            for (int x = 0; x < rows; x++)
+                for (int y = 0; y < columns; y++)
+                {
+                    m[x + 4 * y] = grid[x,y];
+                }
+
+            float[] inv = new float[16];
+            float det;
+            int i;
+
+            inv[0] = m[5] * m[10] * m[15] -
+                     m[5] * m[11] * m[14] -
+                     m[9] * m[6] * m[15] +
+                     m[9] * m[7] * m[14] +
+                     m[13] * m[6] * m[11] -
+                     m[13] * m[7] * m[10];
+
+            inv[4] = -m[4] * m[10] * m[15] +
+                      m[4] * m[11] * m[14] +
+                      m[8] * m[6] * m[15] -
+                      m[8] * m[7] * m[14] -
+                      m[12] * m[6] * m[11] +
+                      m[12] * m[7] * m[10];
+
+            inv[8] = m[4] * m[9] * m[15] -
+                     m[4] * m[11] * m[13] -
+                     m[8] * m[5] * m[15] +
+                     m[8] * m[7] * m[13] +
+                     m[12] * m[5] * m[11] -
+                     m[12] * m[7] * m[9];
+
+            inv[12] = -m[4] * m[9] * m[14] +
+                       m[4] * m[10] * m[13] +
+                       m[8] * m[5] * m[14] -
+                       m[8] * m[6] * m[13] -
+                       m[12] * m[5] * m[10] +
+                       m[12] * m[6] * m[9];
+
+            inv[1] = -m[1] * m[10] * m[15] +
+                      m[1] * m[11] * m[14] +
+                      m[9] * m[2] * m[15] -
+                      m[9] * m[3] * m[14] -
+                      m[13] * m[2] * m[11] +
+                      m[13] * m[3] * m[10];
+
+            inv[5] = m[0] * m[10] * m[15] -
+                     m[0] * m[11] * m[14] -
+                     m[8] * m[2] * m[15] +
+                     m[8] * m[3] * m[14] +
+                     m[12] * m[2] * m[11] -
+                     m[12] * m[3] * m[10];
+
+            inv[9] = -m[0] * m[9] * m[15] +
+                      m[0] * m[11] * m[13] +
+                      m[8] * m[1] * m[15] -
+                      m[8] * m[3] * m[13] -
+                      m[12] * m[1] * m[11] +
+                      m[12] * m[3] * m[9];
+
+            inv[13] = m[0] * m[9] * m[14] -
+                      m[0] * m[10] * m[13] -
+                      m[8] * m[1] * m[14] +
+                      m[8] * m[2] * m[13] +
+                      m[12] * m[1] * m[10] -
+                      m[12] * m[2] * m[9];
+
+            inv[2] = m[1] * m[6] * m[15] -
+                     m[1] * m[7] * m[14] -
+                     m[5] * m[2] * m[15] +
+                     m[5] * m[3] * m[14] +
+                     m[13] * m[2] * m[7] -
+                     m[13] * m[3] * m[6];
+
+            inv[6] = -m[0] * m[6] * m[15] +
+                      m[0] * m[7] * m[14] +
+                      m[4] * m[2] * m[15] -
+                      m[4] * m[3] * m[14] -
+                      m[12] * m[2] * m[7] +
+                      m[12] * m[3] * m[6];
+
+            inv[10] = m[0] * m[5] * m[15] -
+                      m[0] * m[7] * m[13] -
+                      m[4] * m[1] * m[15] +
+                      m[4] * m[3] * m[13] +
+                      m[12] * m[1] * m[7] -
+                      m[12] * m[3] * m[5];
+
+            inv[14] = -m[0] * m[5] * m[14] +
+                       m[0] * m[6] * m[13] +
+                       m[4] * m[1] * m[14] -
+                       m[4] * m[2] * m[13] -
+                       m[12] * m[1] * m[6] +
+                       m[12] * m[2] * m[5];
+
+            inv[3] = -m[1] * m[6] * m[11] +
+                      m[1] * m[7] * m[10] +
+                      m[5] * m[2] * m[11] -
+                      m[5] * m[3] * m[10] -
+                      m[9] * m[2] * m[7] +
+                      m[9] * m[3] * m[6];
+
+            inv[7] = m[0] * m[6] * m[11] -
+                     m[0] * m[7] * m[10] -
+                     m[4] * m[2] * m[11] +
+                     m[4] * m[3] * m[10] +
+                     m[8] * m[2] * m[7] -
+                     m[8] * m[3] * m[6];
+
+            inv[11] = -m[0] * m[5] * m[11] +
+                       m[0] * m[7] * m[9] +
+                       m[4] * m[1] * m[11] -
+                       m[4] * m[3] * m[9] -
+                       m[8] * m[1] * m[7] +
+                       m[8] * m[3] * m[5];
+
+            inv[15] = m[0] * m[5] * m[10] -
+                      m[0] * m[6] * m[9] -
+                      m[4] * m[1] * m[10] +
+                      m[4] * m[2] * m[9] +
+                      m[8] * m[1] * m[6] -
+                      m[8] * m[2] * m[5];
+
+            det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+            //if (det == 0)
+            //    return false;
+
+            det = 1.0f / det;
+
+            float[] invOut = new float[16];
+
+            for (i = 0; i < 16; i++)
+                invOut[i] = inv[i] * det;
+
+            Matrix matOut = new Matrix(columns, rows);
+
+            for (int x = 0; x < rows; x++)
+                for (int y = 0; y < columns; y++)
+                {
+                     matOut.grid[x, y] = invOut[x + 4 * y];
+                }
+
+            return matOut;
+        }
     }
 
     public class Transform
@@ -362,16 +516,41 @@ namespace RaytracerWF
         public Matrix rotation;
         public Matrix scale;
 
-        public void Set()
+        public Matrix transform;
+
+        public List<Matrix> transList;
+
+        public Transform(Transform trans)
+        {
+            translate = trans.translate;
+            rotation = trans.rotation;
+            scale = trans.scale;
+            transform =  new Matrix();
+            transList = new List<Matrix>();
+            foreach(Matrix tran in trans.transList)
+            {
+                transList.Add(tran);
+            }
+        }
+
+        public Transform()
         {
             translate = new Matrix();
             rotation = new Matrix();
             scale = new Matrix();
+            transform = new Matrix();
+            transList = new List<Matrix>();
         }
 
         public Matrix GetMatrix()
         {
-            return (translate * rotation) * scale;
+            //return translate * rotation * scale;
+            transform = new Matrix();
+            for(int i = transList.Count - 1; i >=0; i--)
+            {
+                transform = transList[i] * transform;
+            }
+            return transform;
         }
     }
 }

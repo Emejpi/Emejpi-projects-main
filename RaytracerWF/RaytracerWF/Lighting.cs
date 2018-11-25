@@ -12,41 +12,119 @@ using System.Diagnostics;
 
 namespace RaytracerWF
 {
+    public class MyColor
+    {
+        public int r;
+        public int g;
+        public int b;
+
+        public static MyColor Black = new MyColor(0, 0, 0);
+
+        public MyColor(Color color)
+        {
+            r = color.R;
+            g = color.G;
+            b = color.B;
+        }
+
+        public MyColor(int R, int G, int B)
+        {
+            r = R;
+            g = G;
+            b = B;
+        }
+
+        public Vector3 ToFloat()
+        {
+            return new Vector3((float)r / 255, (float)g / 255, (float)b / 255);
+        }
+
+        public Color ToColor()
+        {
+            int r = Math.Min(255, this.r);
+            int g = Math.Min(255, this.g);
+            int b = Math.Min(255, this.b);
+            return Color.FromArgb(r, g, b);
+        }
+
+        public string ToString()
+        {
+            return "R - " + r + " : G - " + g + " : B - " + b;
+        }
+
+        public static MyColor operator *(MyColor c1, MyColor c2)
+        {
+            Vector3 v1 = c1.ToFloat();
+            Vector3 v2 = c2.ToFloat();
+
+            Vector3 v = v1 * v2;
+
+            return v.ToMyColor();
+        }
+
+
+
+        public static MyColor operator *(MyColor c1, float value)
+        {
+            Vector3 v1 = c1.ToFloat();
+            Vector3 v = v1 * value;
+
+            return v.ToMyColor();
+        }
+
+        public static MyColor operator /(MyColor c1, float value)
+        {
+            Vector3 v1 = c1.ToFloat();
+            Vector3 v = v1 / value;
+
+            return v.ToMyColor();
+        }
+
+        public static MyColor operator +(MyColor c1, MyColor c2)
+        {
+            return new MyColor(c1.r + c2.r, c1.g + c2.g, c1.b + c2.b);
+        }
+    }
+
     public class Light
     {
-        public Color color;
+        public MyColor color;
 
         public virtual Vector3 GetDiraction(Vector3 atPose)
         {
             return new Vector3();
         }
 
-        public virtual Color GetLightColor()
+        public virtual MyColor GetLightColor(Vector3 point)
         {
             return color;
         }
 
-        public Color GetColorAtPoint(Vector3 point, Material material, Vector3 normal)
+        public virtual Vector3 GetPosition()
         {
-            Vector3 direction = GetDiraction(point);
-
-            return AddColors(material.ambient
-                , MultiplyColors(GetLightColor(), MultiplyColor(material.diffuse,Max(0, Vector3.Dot(direction, normal)))));
+            return new Vector3();
         }
 
-        public Color MultiplyColors(Color c1, Color c2)
+        public MyColor GetColorAtPoint(Vector3 cameraPose, Vector3 point, Material material, Vector3 normal)
         {
-            return Color.FromArgb(c1.R * c2.R, c1.G * c2.G, c1.B * c2.B);
-        }
+            int visible = 1;
 
-        public Color MultiplyColor(Color c1, float value)
-        {
-            return Color.FromArgb((int)(c1.R * value), (int)(c1.G * value), (int)(c1.B * value));
-        }
+            Vector3 lightDirection = GetDiraction(point);
+            Vector3 toCamera = (cameraPose - point).Normalize();
+            Vector3 halfVector = (lightDirection + toCamera).Normalize();
 
-        public Color AddColors(Color c1, Color c2)
-        {
-            return Color.FromArgb(c1.R + c2.R, c1.G + c2.G, c1.B + c2.B);
+            MyColor lightColor = GetLightColor(point);
+            MyColor ambient = material.ambient;
+            MyColor emission = material.emission;
+            MyColor diffuse = material.diffuse * (Max(0, Vector3.Dot(lightDirection, normal)));
+            MyColor specular = material.specular * (float)Math.Pow(Max(0, Vector3.Dot(halfVector, normal)), material.shininess);
+
+            //Debug.WriteLine("lightColor " + lightColor.ToString());
+            //Debug.WriteLine("diffuse " + diffuse.ToString());
+
+            //return AddColors(material.ambient, MultiplyColors(GetLightColor(point), MultiplyColor(material.diffuse,Max(0, Vector3.Dot(direction, normal)))));
+            MyColor outColor = ambient + emission + lightColor * visible * (diffuse + specular);
+            return outColor;
         }
 
         float Max(float v1, float v2)
@@ -70,44 +148,59 @@ namespace RaytracerWF
         {
             return direction;
         }
+
+        public override Vector3 GetPosition()
+        {
+            return (direction * -1000);
+        }
     }
 
     public class PointLight : Light
     {
         public PointLight()
         {
-            constant = 1;
-            linear = 0;
-            quadratic = 0;
+            if(constant == 0)
+                constant = 1;
 
             position = new Vector3();
         }
 
         public Vector3 position;
-        public float constant;
-        public float linear;
-        public float quadratic;
+        public static float constant;
+        public static float linear;
+        public static float quadratic;
+
+        public override Vector3 GetPosition()
+        {
+            return position;
+        }
 
         public override Vector3 GetDiraction(Vector3 atPose)
         {
             return (position - atPose).Normalize();
         }
+
+        public override MyColor GetLightColor(Vector3 point)
+        {
+            float distance = (position - point).Magnitude();
+            return color; //* (1 / (constant + linear * distance + distance * distance * quadratic));
+        }
     }
 
     public class Material
     {
-        public Color ambient;
-        public Color diffuse;
-        public Color specular;
-        public Color emission;
+        public MyColor ambient;
+        public MyColor diffuse;
+        public MyColor specular;
+        public MyColor emission;
         public float shininess;
 
         public Material()
         {
-            ambient = Color.Black;
-            diffuse = Color.Black;
-            specular = Color.Black;
-            emission = Color.Black;
+            ambient = MyColor.Black;
+            diffuse = MyColor.Black;
+            specular = MyColor.Black;
+            emission = MyColor.Black;
             shininess = 0;
         }
 

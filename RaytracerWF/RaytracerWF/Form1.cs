@@ -46,29 +46,24 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //Transform transform = new Transform();
-            //transform.CalcTransformMatrix();
-
-            //for (int x = 0; x < transform.matrix.rows; x++)
-            //{
-            //    Debug.WriteLine("row" + x);
-            //    for (int y = 0; y < transform.matrix.columns; y++)
-            //    {
-            //        Debug.WriteLine("column" + y);
-            //        Debug.WriteLine("value -" + transform.matrix.grid[x,y]);
-            //    }
-            //}
-
-                    camera = new Camera();
-            //light = new Light();
+            camera = new Camera();
 
             primitives = new List<Primitive>();
 
             FileReader reader = new FileReader();
-            reader.Read(@"C:\Users\komp\Downloads\test\test\scene4-ambient.test");
+            reader.Read(@"C:\Users\Emejpi\Downloads\RayTracer-master\RayTracer-master\example_inputs\scene5.test");
+
+            Debug.WriteLine(light.color.ToString());
 
             foreach (Primitive primitive in primitives)
+            {
+                Debug.WriteLine("trans");
                 reader.DrawMatrix(primitive.transform);
+                Debug.WriteLine("rev");
+                reader.DrawMatrix(primitive.reverseTransform);
+                Debug.WriteLine("*");
+                reader.DrawMatrix(primitive.reverseTransform * primitive.transform);
+            }
 
             Debug.WriteLine("Read complited");
 
@@ -76,6 +71,11 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
             pictureBox1.Size = new System.Drawing.Size(camera.width, camera.height - 1);
 
             Bitmap bmp = new Bitmap(camera.width, camera.height - 1);
+
+            int pixelsCount = camera.height * camera.width;
+            float percHitSomething = 0;
+            float percInShadow = 0;
+            bool noLighting = false;
 
             for (int y = 1; y < camera.height; y++)
             {
@@ -88,35 +88,148 @@ namespace RaytracerWF // Możliwe że intersect źle działa pod kątem
                     float closestPointOfContact = 10000;
                     Vector3 pointOfContact;
 
+                    bool hitSomething = false;
+                    bool inShadow = false;
+
                     foreach (Primitive primitive in primitives)
                     {
-                        //Debug.WriteLine("before");
-                        //reader.DrawMatrix(primitive.transform);
-
-                        Ray transformedRay = primitive.transform.Reverse() * ray;
-                        //Debug.WriteLine("after");
-                        //reader.DrawMatrix(primitive.transform.Reverse());
                         Vector3 norm;
 
-                        if (primitive.Intersect(transformedRay, out pointOfContact, out norm))
+                        Vector3 pointBehind = ray.origin + ray.direction * 1000;
+                        if (primitive.Intersect(ray, out pointOfContact, out norm))
                         {
-                            pointOfContact = primitive.transform * pointOfContact;
+                            //float oldPointOfContactToLightR = Vector3.Distance(ray.origin, pointBehind);
+                            //float newPointOfContactToLightR = Vector3.Distance(pointOfContact, pointBehind);
+                            //float oldToNewR = Vector3.Distance(ray.origin, pointOfContact);
 
-                            float curDistance = Vector3.Distance(camera.position, pointOfContact);
+                            //if (float.IsNaN(oldToNewR)
+                            //|| oldPointOfContactToLightR < newPointOfContactToLightR
+                            //|| oldPointOfContactToLightR < oldToNewR)
+                            //{
+                            //    continue;
+                            //}
+
+                                float curDistance = Vector3.Distance(camera.position, pointOfContact);
                             if (curDistance < closestPointOfContact)
                             {
+                                hitSomething = true;
+
                                 closestPointOfContact = curDistance;
 
                                 //==LIGHT==//
+                                bool visible = true;
+                                if (!noLighting)
+                                {
+                                    Vector3 lightPose = light.GetPosition();
 
-                                pixelColor = light.GetColorAtPoint(pointOfContact, primitive.material, norm);
+                                    Ray toLightRay = new Ray(pointOfContact, (light.GetDiraction(pointOfContact) * -1).Normalize()); //poszukaj filmikow, przeanalizuj laski
+                                    foreach (Primitive lightPrim in primitives)
+                                    {
+                                        if (lightPrim == primitive)
+                                            continue;
+
+                                        Vector3 toLightPointOfContact;
+                                        Vector3 toLightNormal;
+
+                                        if (lightPrim.Intersect(toLightRay, out toLightPointOfContact, out toLightNormal))
+                                        {
+                                            float oldPointOfContactToLight = Vector3.Distance(pointOfContact, lightPose);
+                                            float newPointOfContactToLight = Vector3.Distance(toLightPointOfContact, lightPose);
+                                            float oldToNew = Vector3.Distance(pointOfContact, toLightPointOfContact);
+
+                                            if (!float.IsNaN(oldToNew)
+                                            && oldPointOfContactToLight > newPointOfContactToLight
+                                            && oldPointOfContactToLight > oldToNew)
+                                            {
+                                                visible = false;
+                                                inShadow = true;
+                                                //pixelColor = Color.Black;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                MyColor myPixelColor = new MyColor(0, 0, 0);
+
+                                if (visible)
+                                {
+                                    myPixelColor = noLighting ? primitive.material.diffuse : light.GetColorAtPoint(ray.origin, pointOfContact, primitive.material, norm);
+                                }
+
+                                    if (!noLighting)
+                                    {
+                                        //==Reflections==//
+                                        Ray currentRay = ray;
+                                        Vector3 currentNormal = norm;
+                                        Vector3 currentPoinOfContact = pointOfContact;
+                                        Primitive currentPrimitive = primitive;
+                                        MyColor currentSpecular = currentPrimitive.material.specular;
+                                    if (!visible)
+                                        currentSpecular /= 2;
+                                        for (int i = 0; i < 5; i++)
+                                        {
+                                            bool intersectionFound = false;
+
+                                            Vector3 v = currentRay.direction;
+                                            Vector3 n = currentNormal;
+                                            Vector3 r = v - n * (2 * (Vector3.Dot(n, v)));
+
+                                            currentRay = new Ray(currentPoinOfContact, r.Normalize());
+                                            Vector3 pointBehindIntersected = currentRay.origin + currentRay.direction * 1000;
+                                            foreach (Primitive primReflect in primitives)
+                                            {
+                                                if (currentPrimitive == primReflect)
+                                                    continue;
+
+                                                if (primReflect.Intersect(currentRay, out currentPoinOfContact, out currentNormal))
+                                                {
+                                                    //if (!float.IsNaN(Vector3.Distance(currentPoinOfContact, currentRay.origin))
+                                                    //    && Vector3.Distance(currentRay.origin, pointBehindIntersected) > Vector3.Distance(currentPoinOfContact, pointBehindIntersected))
+                                                    //{
+                                                    float oldPointOfContactToLight = Vector3.Distance(currentRay.origin, pointBehindIntersected);
+                                                    float newPointOfContactToLight = Vector3.Distance(currentPoinOfContact, pointBehindIntersected);
+                                                    float oldToNew = Vector3.Distance(currentRay.origin, currentPoinOfContact);
+
+                                                    if (!float.IsNaN(oldToNew)
+                                                    && oldPointOfContactToLight > newPointOfContactToLight
+                                                    && oldPointOfContactToLight > oldToNew)
+                                                    {
+                                                        MyColor newColor = light.GetColorAtPoint(currentRay.origin, currentPoinOfContact, primReflect.material, currentNormal);
+                                                        myPixelColor = (myPixelColor + (newColor * currentSpecular));
+                                                        currentSpecular = primReflect.material.specular * currentSpecular;
+                                                        intersectionFound = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            if (!intersectionFound)
+                                                break;
+                                        }
+                                    }
+
+                                    pixelColor = myPixelColor.ToColor();
+                                
                             }
                         }
                     }
+                    if (hitSomething)
+                    {
+                        percHitSomething += 1 / (float)pixelsCount;
+                    }
+                    if (inShadow)
+                    {
+                        percInShadow += 1 / (float)pixelsCount;
+                    }
+
                     bmp.SetPixel(x, camera.height - y - 1, pixelColor);
                 }
                 Debug.WriteLine(((float)y / camera.height * 100) + "%");
             }
+
+            Debug.WriteLine("perc hit " + percHitSomething * 100 + "%");
+            Debug.WriteLine("perc in shadow " + percInShadow * 100 + "%");
 
             pictureBox1.Image = bmp;
 

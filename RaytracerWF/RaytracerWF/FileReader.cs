@@ -50,17 +50,16 @@ namespace RaytracerWF
         public FileReader()
         {
             transform = new Transform();
-            transform.Set();
             transformStack = new List<Transform>();
             material = new Material();          
         }
 
         void Push()
         {
-            //DrawMatrix(transform);
-            transformStack.Add(transform);
-            transform = new Transform();
-            transform.Set();
+            DrawMatrix(transform.GetMatrix());
+            transformStack.Add(new Transform(transform));
+            transform = new Transform(transform);
+            //transform.Set();
         }
 
         public void DrawMatrix(Matrix matrix)
@@ -83,10 +82,10 @@ namespace RaytracerWF
 
             int top = transformStack.Count - 1;
 
-            transform = transformStack[top];
+            transform = new Transform(transformStack[top]);
             transformStack.RemoveAt(top);
 
-            //DrawMatrix(transform);
+            DrawMatrix(transform.GetMatrix());
 
             return true;
         }
@@ -186,6 +185,10 @@ namespace RaytracerWF
 
                     case "emission":
                         curCommand = Command.emission;
+                        break;
+
+                    case "shininess":
+                        curCommand = Command.shininess;
                         break;
 
                     default:
@@ -306,7 +309,7 @@ namespace RaytracerWF
 
                     Triangle triangle = new Triangle(vectors[(int)args[0]], vectors[(int)args[1]], vectors[(int)args[2]]);
                     triangle.transform = transform.GetMatrix();
-                    triangle.reverseTransform = triangle.transform.Reverse();
+                    triangle.reverseTransform = triangle.transform.Inverse();
                     triangle.normal = triangle.Normal();
                     triangle.material = new Material(material);
                     Form1.main.AddPrimitive(triangle);
@@ -318,8 +321,10 @@ namespace RaytracerWF
 
                     Sphere sphere = new Sphere(new Vector3(args[0], args[1], args[2]), args[3]);
                     sphere.transform = transform.GetMatrix();
-                    sphere.reverseTransform = sphere.transform.Reverse();
+                    sphere.reverseTransform = sphere.transform.Inverse();
                     sphere.material = new Material(material);
+                    Debug.WriteLine("sphere");
+                    DrawMatrix(sphere.transform);
                     Form1.main.AddPrimitive(sphere);
                     break;
 
@@ -345,7 +350,7 @@ namespace RaytracerWF
                     if (args.Count < 3)
                         return false;
 
-                    material.ambient = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    material.ambient = new MyColor((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
                     break;
 
                 case Command.pushTransform:
@@ -361,7 +366,10 @@ namespace RaytracerWF
                     if (args.Count < 3)
                         return false;
 
-                    transform.translate = Matrix.GetTranslateMatrix(new Vector3(args[0], args[1], args[2])) * transform.translate;
+                    //transform.translate = Matrix.GetTranslateMatrix(new Vector3(args[0], args[1], args[2])) * transform.translate;
+                    //transform.transform = Matrix.GetTranslateMatrix(new Vector3(args[0], args[1], args[2])) * transform.transform;
+
+                    transform.transList.Add(Matrix.GetTranslateMatrix(new Vector3(args[0], args[1], args[2])));
 
                     //DrawMatrix(transform);
 
@@ -372,7 +380,10 @@ namespace RaytracerWF
                     if (args.Count < 3)
                         return false;
 
-                    transform.scale = Matrix.GetScaleMatrix(new Vector3(args[0], args[1], args[2])) * transform.scale;
+                    //transform.scale = Matrix.GetScaleMatrix(new Vector3(args[0], args[1], args[2])) * transform.scale;
+                    //transform.transform = Matrix.GetScaleMatrix(new Vector3(args[0], args[1], args[2])) * transform.transform;
+
+                    transform.transList.Add(Matrix.GetScaleMatrix(new Vector3(args[0], args[1], args[2])));
 
                     //DrawMatrix(transform);
                     break;
@@ -381,13 +392,27 @@ namespace RaytracerWF
                     if (args.Count < 4)
                         return false;
 
-                    if(args[0] != 0.0f)
-                        transform.rotation = Matrix.GetRotationXMatrix(args[0] * args[3]) * transform.rotation;
-                    if (args[1] != 0.0f)
-                        transform.rotation = Matrix.GetRotationYMatrix(args[1] * args[3]) * transform.rotation;
-                    if (args[2] != 0.0f)
-                        transform.rotation = Matrix.GetRotationZMatrix(args[2] * args[3]) * transform.rotation;
+                    if (args[0] != 0.0f)
+                    {
+                        //transform.rotation = Matrix.GetRotationXMatrix(args[0] * args[3]) * transform.rotation;
+                        //transform.transform = Matrix.GetRotationXMatrix(args[0] * args[3]) * transform.transform;
+                        transform.transList.Add(Matrix.GetRotationXMatrix(args[0] * args[3]));
 
+                        //transform.translate = Matrix.GetTranslateMatrix(new Vector3(0, 0.6f, 0) * (args[3] > 0 ? 1 : -1)) * transform.translate;
+                    }
+                    if (args[1] != 0.0f)
+                    {
+                        //transform.rotation = Matrix.GetRotationYMatrix(args[1] * args[3]) * transform.rotation;
+                        //transform.transform = Matrix.GetRotationYMatrix(args[1] * args[3]) * transform.transform;
+                        transform.transList.Add(Matrix.GetRotationYMatrix(args[1] * args[3]));
+                    }
+
+                    if (args[2] != 0.0f)
+                    {
+                        //transform.rotation = Matrix.GetRotationZMatrix(args[2] * args[3]) * transform.rotation;
+                        //transform.transform = Matrix.GetRotationZMatrix(args[2] * args[3]) * transform.transform;
+                        transform.transList.Add(Matrix.GetRotationZMatrix(args[2] * args[3]));
+                    }
                     //DrawMatrix(transform);
                     break;
 
@@ -395,9 +420,11 @@ namespace RaytracerWF
                     if (args.Count < 6)
                         return false;
 
+                    Debug.WriteLine("DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIR");
+
                     DirectionalLight light = new DirectionalLight();
-                    light.color = Color.FromArgb((int)args[3], (int)args[4], (int)args[5]);
-                    light.direction = new Vector3(args[0], args[1], args[2]);
+                    light.color = new MyColor((int)(args[3] * 255), (int)(args[4] * 255), (int)(args[5] * 255));
+                    light.direction = (new Vector3(args[0], args[1], args[2])).Normalize();
                     Form1.main.light = light;
                     break;
 
@@ -405,30 +432,37 @@ namespace RaytracerWF
                     if (args.Count < 6)
                         return false;
 
+                    Debug.WriteLine("POOOOOOOOOOOOOOOOOOOOINT");
+
                     PointLight lightP = new PointLight();
-                    lightP.color = Color.FromArgb((int)args[3], (int)args[4], (int)args[5]);
+                    lightP.color = new MyColor((int)(args[3] * 255), (int)(args[4] * 255), (int)(args[5] * 255));
                     lightP.position = new Vector3(args[0], args[1], args[2]);
                     Form1.main.light = lightP;
+
+                    Debug.WriteLine(lightP.color.ToString());
                     break;
 
                 case Command.attenuation:
                     if (args.Count < 3)
                         return false;
 
+                    PointLight.constant = args[0];
+                    PointLight.linear = args[1];
+                    PointLight.quadratic = args[2];
                     break;
 
                 case Command.diffuse:
                     if (args.Count < 3)
                         return false;
 
-                    material.diffuse = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    material.diffuse = new MyColor((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
                     break;
 
                 case Command.specular:
                     if (args.Count < 3)
                         return false;
 
-                    material.specular = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    material.specular = new MyColor((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
                     break;
 
                 case Command.shininess:
@@ -442,7 +476,7 @@ namespace RaytracerWF
                     if (args.Count < 3)
                         return false;
 
-                    material.emission = Color.FromArgb((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    material.emission = new MyColor((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
                     break;
             }
 
