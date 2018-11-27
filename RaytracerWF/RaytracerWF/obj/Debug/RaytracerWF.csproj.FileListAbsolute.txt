@@ -27,3 +27,5 @@ D:\Git\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.csproj
 D:\Git\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.csproj.CoreCompileInputs.cache
 D:\Git\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.exe
 D:\Git\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.pdb
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.Path.resources
+D:\Unity Projects\Git Emejpi Repo\Emejpi-projects-main\RaytracerWF\RaytracerWF\obj\Debug\RaytracerWF.Wait.resources

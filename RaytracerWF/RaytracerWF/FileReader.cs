@@ -30,7 +30,9 @@ public enum Command
     diffuse,
     specular,
     shininess,
-    emission
+    emission,
+    maxDepth,
+    output
 }
 
 namespace RaytracerWF
@@ -191,9 +193,37 @@ namespace RaytracerWF
                         curCommand = Command.shininess;
                         break;
 
-                    default:
+                    case "maxdepth":
+                        curCommand = Command.maxDepth;
+                        break;
+
+                    case "output":
+                        string pathArg = "";
+                        while (lineIterator < lineTemp.Length)
+                        {
+                            if (lineTemp[lineIterator] == ' ')
+                            {
+                                if (pathArg == "")
+                                {
+                                    lineIterator++;
+                                    continue;
+                                }
+
+                                Form1.savePath = pathArg;
+                                lineIterator++;
+                                continue;
+                            }
+                            pathArg += lineTemp[lineIterator];
+                            lineIterator++;
+                        }
+
+                        //dodaj pelna sciezke???
+
+                        Form1.savePath = pathArg;
                         continue;
 
+                    default:
+                        continue;
                 }
 
                 Debug.WriteLine("Command " + command.ToString());
@@ -420,24 +450,24 @@ namespace RaytracerWF
                     if (args.Count < 6)
                         return false;
 
-                    Debug.WriteLine("DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIR");
+                    //Debug.WriteLine("DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIR");
 
                     DirectionalLight light = new DirectionalLight();
                     light.color = new MyColor((int)(args[3] * 255), (int)(args[4] * 255), (int)(args[5] * 255));
                     light.direction = (new Vector3(args[0], args[1], args[2])).Normalize();
-                    Form1.main.light = light;
+                    Form1.main.lighting.lights.Add(light);
                     break;
 
                 case Command.point:
                     if (args.Count < 6)
                         return false;
 
-                    Debug.WriteLine("POOOOOOOOOOOOOOOOOOOOINT");
+                    //Debug.WriteLine("POOOOOOOOOOOOOOOOOOOOINT");
 
                     PointLight lightP = new PointLight();
                     lightP.color = new MyColor((int)(args[3] * 255), (int)(args[4] * 255), (int)(args[5] * 255));
                     lightP.position = new Vector3(args[0], args[1], args[2]);
-                    Form1.main.light = lightP;
+                    Form1.main.lighting.lights.Add(lightP);
 
                     Debug.WriteLine(lightP.color.ToString());
                     break;
@@ -477,6 +507,13 @@ namespace RaytracerWF
                         return false;
 
                     material.emission = new MyColor((int)(args[0] * 255), (int)(args[1] * 255), (int)(args[2] * 255));
+                    break;
+
+                case Command.maxDepth:
+                    if (args.Count < 1)
+                        return false;
+
+                    Form1.main.maxDepth = (int)(args[0]);
                     break;
             }
 

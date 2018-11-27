@@ -16,7 +16,12 @@ namespace RaytracerWF
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Path());
+        }
+
+        public static void RunRaytracer()
+        {
+            new Form1().Show();
         }
     }
 }
